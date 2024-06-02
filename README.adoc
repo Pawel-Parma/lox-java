@@ -2,20 +2,21 @@
 
 Lox interpreter written in Java following the book http://www.craftinginterpreters.com/[Crafting Interpreters].
 
-= Branches:
+== Branches:
 
-== main (acts as jlox for now)
+=== main (acts as jlox for now)
 
 If you are in the main branch you are looking at the implementation derived from the book.
 It has some solved challenges and my own modifications.
 
-== jlox (does not exist yet)
+
+=== jlox (does not exist yet)
 
 If you are in the jlox branch you are looking at the implementation following book.
 
 
-= Solved Challenges:
+== Solved Challenges:
  - None
 
-= Changed Semantics:
+== Changed Semantics:
  - None
