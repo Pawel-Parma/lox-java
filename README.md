@@ -1,6 +1,6 @@
 # Jlox
 
-Lox interpreter written in Java following the book http://www.craftinginterpreters.com/[Crafting Interpreters].
+Lox interpreter written in Java following the book [Crafting Interpreters](http://www.craftinginterpreters.com/).
 
 ## Branches:
 - ### [*main*](https://github.com/Pawel-Parma/lox-java)
