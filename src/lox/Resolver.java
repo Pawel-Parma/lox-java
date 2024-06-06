@@ -1,7 +1,5 @@
 package lox;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,16 +18,23 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         NONE,
         FUNCTION,
         INITIALIZER,
-        METHOD,
+        METHOD
     }
 
     private enum ClassType {
         NONE,
         CLASS,
-        SUBCLASS,
+        SUBCLASS
     }
 
     private ClassType currentClass = ClassType.NONE;
+
+
+    void resolve(List<Stmt> statements) {
+        for (Stmt statement : statements) {
+            resolve(statement);
+        }
+    }
 
     @Override
     public Void visitBlockStmt(Stmt.Block stmt) {
@@ -247,15 +252,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         expr.accept(this);
     }
 
-    void resolve(List<Stmt> statements) {
-        for (Stmt statement : statements) {
-            resolve(statement);
-        }
-    }
-
     private void resolveFunction(Stmt.Function function, FunctionType type) {
         FunctionType enclosingFunction = currentFunction;
         currentFunction = type;
+
         beginScope();
         for (Token param : function.params) {
             declare(param);
@@ -281,6 +281,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         if (scope.containsKey(name.lexeme)) {
             Lox.error(name, "Already a variable with this name in this scope.");
         }
+
         scope.put(name.lexeme, false);
     }
 

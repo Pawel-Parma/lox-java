@@ -20,6 +20,11 @@ class LoxFunction implements LoxCallable {
     }
 
     @Override
+    public String toString() {
+        return "<fn " + declaration.name.lexeme + ">";
+    }
+
+    @Override
     public int arity() {
         return declaration.params.size();
     }
@@ -40,10 +45,5 @@ class LoxFunction implements LoxCallable {
 
         if (isInitializer) return closure.getAt(0, "this");
         return null;
-    }
-
-    @Override
-    public String toString() {
-        return "<fn " + declaration.name.lexeme + ">";
     }
 }
