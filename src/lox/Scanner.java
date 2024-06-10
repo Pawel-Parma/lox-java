@@ -27,6 +27,7 @@ class Scanner {
         keywords.put("this",   THIS);
         keywords.put("true",   TRUE);
         keywords.put("var",    VAR);
+        keywords.put("const",  CONST);
         keywords.put("while",  WHILE);
     }
 

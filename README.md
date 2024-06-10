@@ -9,9 +9,29 @@ If you are in the main branch you are looking at the implementation derived from
 It has some solved challenges and my own modifications.
 
 <details>
-  <summary>Changes:</summary>
+ <summary>Changes:</summary>
   <ul>
-    <li>None</li>
+   <li>
+    const - declaration for immutable data 
+    <br>
+
+    // Values
+    const x = 1;
+    x = 2; // Error at 'x': Cannot reassign a constant.
+    
+    // Classes
+    class A {
+        init(b) { this.b = 1; }
+    }
+
+    const a = A(1);
+    a.b = 2; // Error at 'b': Cannot modify a field of a constant object.
+    
+    // But this is allowed
+    var a_mut = a;
+    a.b = 2; // No error
+
+   </li>
   </ul>
 </details>
 

@@ -34,6 +34,7 @@ class Parser {
             if (match(CLASS)) return classDeclaration();
             if (match(FUN)) return function("function");
             if (match(VAR)) return varDeclaration();
+            if (match(CONST)) return constDeclaration();
 
             return statement();
         } catch (ParseError error) {
@@ -48,7 +49,7 @@ class Parser {
         Expr.Variable superclass = null;
         if (match(LESS)) {
             consume(IDENTIFIER, "Expect superclass name.");
-            superclass = new Expr.Variable(previous());
+            superclass = new Expr.Variable(previous(), TokenType.VAR);
         }
 
         consume(LEFT_BRACE, "Expect '{' before class body.");
@@ -153,7 +154,19 @@ class Parser {
         }
 
         consume(SEMICOLON, "Expect ';' after variable declaration.");
-        return new Stmt.Var(name, initializer);
+        return new Stmt.Var(name, initializer, TokenType.VAR);
+    }
+
+    private Stmt constDeclaration() {
+        Token name = consume(IDENTIFIER, "Expect variable name.");
+
+        Expr initializer = null;
+        if (match(EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new Stmt.Var(name, initializer, TokenType.CONST);
     }
 
     private Stmt whileStatement() {
@@ -357,7 +370,7 @@ class Parser {
         if (match(THIS)) return new Expr.This(previous());
 
         if (match(IDENTIFIER)) {
-            return new Expr.Variable(previous());
+            return new Expr.Variable(previous(), TokenType.VAR);
         }
 
         if (match(LEFT_PAREN)) {
@@ -422,6 +435,7 @@ class Parser {
                 case CLASS:
                 case FUN:
                 case VAR:
+                case CONST:
                 case FOR:
                 case IF:
                 case WHILE:

@@ -1,13 +1,11 @@
 package lox;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private final Stack<Set<String>> constants = new Stack<>(); // Add this line
     private FunctionType currentFunction = FunctionType.NONE;
 
     Resolver(Interpreter interpreter) {
@@ -139,6 +137,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             resolve(stmt.initializer);
         }
         define(stmt.name);
+
+        if (stmt.varType == TokenType.CONST) {
+            if (constants.isEmpty()) {
+                constants.push(new HashSet<>());
+            }
+            constants.peek().add(stmt.name.lexeme);
+        }
+
         return null;
     }
 
@@ -152,7 +158,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitAssignExpr(Expr.Assign expr) {
         resolve(expr.value);
+
+        if (!constants.isEmpty() && constants.peek().contains(expr.name.lexeme)) {
+            Lox.error(expr.name, "Cannot reassign a constant.");
+        }
+
         resolveLocal(expr, expr.name);
+
         return null;
     }
 
@@ -198,9 +210,16 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         return null;
     }
 
-    @Override
     public Void visitSetExpr(Expr.Set expr) {
         resolve(expr.value);
+
+        if (expr.object instanceof Expr.Variable variable) {
+            if (!constants.isEmpty() && constants.peek().contains(variable.name.lexeme)) {
+                Lox.error(expr.name, "Cannot modify a field of a constant object.");
+                return null;
+            }
+        }
+
         resolve(expr.object);
         return null;
     }
@@ -268,10 +287,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     private void beginScope() {
         scopes.push(new HashMap<String, Boolean>());
+        constants.push(new HashSet<>());
     }
 
     private void endScope() {
         scopes.pop();
+        constants.pop();
     }
 
     private void declare(Token name) {

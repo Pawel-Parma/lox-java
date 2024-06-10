@@ -25,7 +25,7 @@ public class GenerateAst {
                 "Super    : Token keyword, Token method",
                 "This     : Token keyword",
                 "Unary    : Token operator, Expr right",
-                "Variable : Token name"
+                "Variable : Token name, TokenType varType"
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(
@@ -36,7 +36,7 @@ public class GenerateAst {
                 "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
                 "Print      : Expr expression",
                 "Return     : Token keyword, Expr value",
-                "Var        : Token name, Expr initializer",
+                "Var        : Token name, Expr initializer, TokenType varType",
                 "While      : Expr condition, Stmt body"
         ));
     }
