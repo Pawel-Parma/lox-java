@@ -235,7 +235,15 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                     return leftString + rightString;
                 }
 
-                throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
+                if (left instanceof String leftString && right instanceof Double rightDouble) {
+                    return leftString + rightDouble;
+                }
+
+                if (left instanceof Double leftDouble && right instanceof String rightString) {
+                    return leftDouble + rightString;
+                }
+
+                throw new RuntimeError(expr.operator, "Operands must be numbers or strings.");
             case SLASH:
                 checkNumberOperands(expr.operator, left, right);
                 return (double)left / (double)right;

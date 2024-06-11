@@ -46,10 +46,15 @@ It has some solved challenges and my own modifications.
    </li>
   </ul>
 
+  <ul>
+   <li>
+    Escape sequences in strings - [ \n, \r, \t, \b, \', \", \\ ]. Note " ' " still works, no need for " \' ".
+   </li>
+  </ul>
 
   <ul>
    <li>
-    escape sequences in strings - [ \n, \r, \t, \b, \', \", \\ ]. Note " ' " still works, no need for " \' ".
+    String and number concatenation using the '+' operator.
    </li>
   </ul>
 </details>
