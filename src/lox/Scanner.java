@@ -137,9 +137,56 @@ class Scanner {
     }
 
     private void string() {
-        while (peek() != '"' && !isAtEnd()) {
+        StringBuilder sb = new StringBuilder();
+        boolean currentCharSlash = false;
+        char preprepreviousChar = '\0';
+        char prepreviousChar = '\0';
+        char previousChar = '\0';
+        char currentChar = '\0';
+        while ((peek() != '"' || currentChar == '\\' && prepreviousChar != '\\') && !isAtEnd()) {
             if (peek() == '\n') line++;
-            advance();
+            currentChar = source.charAt(current);;
+
+            if ((previousChar == '\\' && prepreviousChar != '\\') || (previousChar == '\\' && preprepreviousChar == '\\')) {
+                switch (currentChar) {
+                    case 'n':
+                        sb.append('\n');
+                        break;
+                    case 'r':
+                        sb.append('\r');
+                        break;
+                    case 't':
+                        sb.append('\t');
+                        break;
+                    case 'b':
+                        sb.append('\b');
+                        break;
+                    case '\'':
+                        sb.append("'");
+                        break;
+                    case '"':
+                        sb.append('"');
+                        break;
+                    case '\\':
+                        sb.append('\\');
+                        break;
+                    default:
+                        Lox.error(line, "Invalid escape sequence: '" + previousChar + currentChar + "'.");
+                        break;
+                }
+            } else if (currentChar == '\\') {
+                currentCharSlash = true;
+            } else if (currentCharSlash) {
+                sb.append(currentChar);
+                currentCharSlash = false;
+            } else {
+                sb.append(currentChar);
+            }
+
+            current++;
+            preprepreviousChar = prepreviousChar;
+            prepreviousChar = previousChar;
+            previousChar = currentChar;
         }
 
         if (isAtEnd()) {
@@ -150,8 +197,7 @@ class Scanner {
         // The closing ".
         advance();
 
-        // Trim the surrounding quotes.
-        String value = source.substring(start + 1, current - 1);
+        String value = sb.toString();
         addToken(STRING, value);
     }
 

@@ -12,7 +12,7 @@ It has some solved challenges and my own modifications.
  <summary>Changes:</summary>
   <ul>
    <li>
-    const - declaration for immutable data 
+    const - declaration for immutable data. Examples:
     <br>
 
     // Values
@@ -27,7 +27,7 @@ It has some solved challenges and my own modifications.
     const a = A(1);
     a.b = 2; // Error at 'b': Cannot modify a field of a constant object.
     
-    // But this is allowed
+    // But this is allowed:
     var a_mut = a;
     a.b = 2; // No error
 
@@ -36,13 +36,20 @@ It has some solved challenges and my own modifications.
 
   <ul>
    <li>
-    break - statement for breaking out of loops
+    break - statement for breaking out of loops.
    </li>
   </ul>
 
   <ul>
    <li>
-    continue - statement for skipping the rest of the loop body
+    continue - statement for skipping the rest of the loop body.
+   </li>
+  </ul>
+
+
+  <ul>
+   <li>
+    escape sequences in strings - [ \n, \r, \t, \b, \', \", \\ ]. Note " ' " still works, no need for " \' ".
    </li>
   </ul>
 </details>
