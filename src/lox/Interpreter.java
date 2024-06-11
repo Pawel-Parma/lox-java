@@ -8,7 +8,7 @@ import java.util.Map;
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     final Environment globals = new Environment();
     private Environment environment = globals;
-    private final Map<Expr, Integer> locals = new HashMap<>();
+    final Map<Expr, Integer> locals = new HashMap<>();
 
     Interpreter() {
         globals.define("clock", new LoxCallable() {
@@ -49,14 +49,29 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     void executeBlock(List<Stmt> statements, Environment environment) {
         Environment previous = this.environment;
+        boolean didContinue = false;
         try {
             this.environment = environment;
+            boolean isContinue = false;
 
-            for (Stmt statement : statements) {
-                execute(statement);
+            for (int i = 0; i < statements.size(); i++) {
+                if (isContinue && statements.size() > i + 1) {
+                    continue;
+                }
+
+                Stmt statement = statements.get(i);
+                try {
+                    execute(statement);
+                } catch (Continue ignored) {
+                    didContinue = isContinue = true;
+                }
             }
         } finally {
             this.environment = previous;
+        }
+
+        if (didContinue) {
+            throw new Continue();
         }
     }
 
@@ -150,10 +165,28 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
-        while (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.body);
+        try {
+            while (isTruthy(evaluate(stmt.condition))) {
+                try {
+                    execute(stmt.body);
+                } catch (Continue ignored) {}
+            }
+
+        } catch (Break b) {
+            return null;
         }
+
         return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        throw new Break();
+    }
+
+    public Void visitContinueStmt(Stmt.Continue stmt) {
+        throw new Continue();
+
     }
 
     @Override
@@ -340,7 +373,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private void checkNumberOperands(Token operator, Object left, Object right) {
         if (left instanceof Double && right instanceof Double) return;
-        throw new RuntimeError(operator, "Operands must be numbers.");
+        // throw new RuntimeError(operator, "Operands must be numbers.");
     }
 
     private boolean isTruthy(Object object) {

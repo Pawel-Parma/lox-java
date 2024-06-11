@@ -29,6 +29,8 @@ class Scanner {
         keywords.put("var",    VAR);
         keywords.put("const",  CONST);
         keywords.put("while",  WHILE);
+        keywords.put("break",  BREAK);
+        keywords.put("continue",  CONTINUE);
     }
 
     private final String source;

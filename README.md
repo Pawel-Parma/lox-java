@@ -33,6 +33,18 @@ It has some solved challenges and my own modifications.
 
    </li>
   </ul>
+
+  <ul>
+   <li>
+    break - statement for breaking out of loops
+   </li>
+  </ul>
+
+  <ul>
+   <li>
+    continue - statement for skipping the rest of the loop body
+   </li>
+  </ul>
 </details>
 
 - ### [*jlox*](https://github.com/Pawel-Parma/lox-java/tree/jlox)

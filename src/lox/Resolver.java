@@ -7,6 +7,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private final Stack<Set<String>> constants = new Stack<>(); // Add this line
     private FunctionType currentFunction = FunctionType.NONE;
+    private ClassType currentClass = ClassType.NONE;
+    private boolean isInLoop = false;
 
     Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -24,9 +26,6 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         CLASS,
         SUBCLASS
     }
-
-    private ClassType currentClass = ClassType.NONE;
-
 
     void resolve(List<Stmt> statements) {
         for (Stmt statement : statements) {
@@ -150,8 +149,26 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
+        beginLoop();
         resolve(stmt.condition);
         resolve(stmt.body);
+        endLoop();
+        return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        if (!isInLoop) {
+            Lox.error(stmt.keyword, "Can't use 'break' outside of a loop.");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitContinueStmt(Stmt.Continue stmt) {
+        if (!isInLoop) {
+            Lox.error(stmt.keyword, "Can't use 'continue' outside of a loop.");
+        }
         return null;
     }
 
@@ -293,6 +310,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private void endScope() {
         scopes.pop();
         constants.pop();
+    }
+
+    private void beginLoop() {
+        isInLoop = true;
+    }
+
+    private void endLoop() {
+        isInLoop = false;
     }
 
     private void declare(Token name) {
