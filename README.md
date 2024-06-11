@@ -57,6 +57,12 @@ It has some solved challenges and my own modifications.
     String and number concatenation using the '+' operator.
    </li>
   </ul>
+
+  <ul>
+   <li>
+    def keyword before method declaration is now required.
+   </li>
+  </ul>
 </details>
 
 - ### [*jlox*](https://github.com/Pawel-Parma/lox-java/tree/jlox)

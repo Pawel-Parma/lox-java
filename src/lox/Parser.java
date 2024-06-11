@@ -56,6 +56,7 @@ class Parser {
 
         List<Stmt.Function> methods = new ArrayList<>();
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            consume(DEF, "Expect 'def' keyword before method declaration.");
             methods.add(function("method"));
         }
 
