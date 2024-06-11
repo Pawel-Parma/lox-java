@@ -36,31 +36,106 @@ It has some solved challenges and my own modifications.
 
   <ul>
    <li>
-    break - statement for breaking out of loops.
+    break - statement for breaking out of loops. Example:
+    
+    for (var i = 0; i < 10; i = i + 1) {
+        if (i == 5) break;
+        print i;
+    }
+
+    Output:
+    // 0
+    // 1
+    // 2
+    // 3
+    // 4
+
    </li>
   </ul>
 
   <ul>
    <li>
-    continue - statement for skipping the rest of the loop body.
+    continue - statement for skipping the rest of the loop body. Example: 
+    
+    for (var i = 0; i < 10; i = i + 1) {
+        if (i % 2 == 0) continue;
+        print i;
+    }
+
+    Output:
+    // 1
+    // 3
+    // 5
+    // 7
+    // 9
+
    </li>
   </ul>
 
   <ul>
    <li>
     Escape sequences in strings - [ \n, \r, \t, \b, \', \", \\ ]. Note " ' " still works, no need for " \' ".
+    Examples:    
+    
+    // New line
+    print "Hello\nWorld"; // Hello
+                          // World
+                          // 
+    
+    // Tab
+    print "Hello\tWorld"; // World  World
+
+    // Backspace
+    print "Hello\b World"; // Hell World
+
    </li>
   </ul>
 
   <ul>
    <li>
     String and number concatenation using the '+' operator.
+
+    // string + number
+    print "123" + 4; // 1234 (string)
+
+    // number + string
+    print 4 + "123"; // 4123 (string)
+
    </li>
   </ul>
 
   <ul>
    <li>
     def keyword before method declaration is now required.
+
+    // Before
+    class A {
+        init() { print "A"; }
+    }
+
+    // Now
+    class A {
+        def init() { print "A"; }
+    }
+
+   </li>
+  </ul>
+
+  <ul>
+   <li>
+    lambda expressions - anonymous functions. Examples:
+
+    // Single line
+    const add = lambda(a, b) { return a + b; };
+    print add(1, 2); // 3
+
+    // Multi line
+    const add = lambda(a, b) {
+        var c = a + b;
+        return c;
+    };
+    print add(3, 2); // 3
+
    </li>
   </ul>
 </details>

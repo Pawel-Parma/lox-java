@@ -41,6 +41,11 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
+    public String visitLambdaExpr(Expr.Lambda expr) {
+        return "lambda(" + expr.function.params.stream().map(p -> p.lexeme).collect(Collectors.joining(", ")) + ") ";
+    }
+
+    @Override
     public String visitGetExpr(Expr.Get expr) {
         return print(expr.object) + "." + expr.name.lexeme;
     }

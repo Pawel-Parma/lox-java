@@ -19,6 +19,7 @@ class Scanner {
         keywords.put("for",    FOR);
         keywords.put("def",    DEF);
         keywords.put("fun",    FUN);
+        keywords.put("lambda", LAMBDA);
         keywords.put("if",     IF);
         keywords.put("nil",    NIL);
         keywords.put("or",     OR);

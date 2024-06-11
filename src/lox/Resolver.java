@@ -17,6 +17,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private enum FunctionType {
         NONE,
         FUNCTION,
+        LAMBDA,
         INITIALIZER,
         METHOD
     }
@@ -200,6 +201,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             resolve(argument);
         }
 
+        return null;
+    }
+
+    @Override
+    public Void visitLambdaExpr(Expr.Lambda expr) {
+        resolveFunction(expr.function, FunctionType.LAMBDA);
         return null;
     }
 
