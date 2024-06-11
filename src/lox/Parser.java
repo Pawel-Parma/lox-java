@@ -49,7 +49,7 @@ class Parser {
         Expr.Variable superclass = null;
         if (match(LESS)) {
             consume(IDENTIFIER, "Expect superclass name.");
-            superclass = new Expr.Variable(previous(), TokenType.VAR);
+            superclass = new Expr.Variable(previous());
         }
 
         consume(LEFT_BRACE, "Expect '{' before class body.");
@@ -239,8 +239,7 @@ class Parser {
             if (expr instanceof Expr.Variable) {
                 Token name = ((Expr.Variable)expr).name;
                 return new Expr.Assign(name, value);
-            } else if (expr instanceof Expr.Get) {
-                Expr.Get get = (Expr.Get)expr;
+            } else if (expr instanceof Expr.Get get) {
                 return new Expr.Set(get.object, get.name, value);
             }
 
@@ -384,7 +383,7 @@ class Parser {
         if (match(THIS)) return new Expr.This(previous());
 
         if (match(IDENTIFIER)) {
-            return new Expr.Variable(previous(), TokenType.VAR);
+            return new Expr.Variable(previous());
         }
 
         if (match(LEFT_PAREN)) {

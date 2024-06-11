@@ -25,7 +25,7 @@ public class GenerateAst {
                 "Super    : Token keyword, Token method",
                 "This     : Token keyword",
                 "Unary    : Token operator, Expr right",
-                "Variable : Token name, TokenType varType"
+                "Variable : Token name"
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(

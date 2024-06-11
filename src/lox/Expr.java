@@ -174,9 +174,8 @@ abstract class Expr {
     final Expr right;
   }
   static class Variable extends Expr {
-    Variable(Token name, TokenType varType) {
+    Variable(Token name) {
       this.name = name;
-      this.varType = varType;
     }
 
     @Override
@@ -185,7 +184,6 @@ abstract class Expr {
     }
 
     final Token name;
-    final TokenType varType;
   }
 
   abstract <R> R accept(Visitor<R> visitor);
