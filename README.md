@@ -179,6 +179,16 @@ It has some solved challenges and my own modifications.
 
    </li>
   </ul>
+
+  <ul>
+   <li>
+    modulo operator. Examples:
+
+    print 4 % 2; // 0
+    print 5 % 2; // 1
+
+   </li>
+  </ul>
 </details>
 
 - ### [*jlox*](https://github.com/Pawel-Parma/lox-java/tree/jlox)

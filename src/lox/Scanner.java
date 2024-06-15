@@ -15,28 +15,28 @@ class Scanner {
 
     static {
         keywords = new HashMap<>();
-        keywords.put("and",    AND);
-        keywords.put("class",  CLASS);
-        keywords.put("else",   ELSE);
-        keywords.put("false",  FALSE);
-        keywords.put("for",    FOR);
-        keywords.put("def",    DEF);
-        keywords.put("fun",    FUN);
-        keywords.put("lambda", LAMBDA);
-        keywords.put("import", IMPORT);
-        keywords.put("as", AS);
-        keywords.put("if",     IF);
-        keywords.put("nil",    NIL);
-        keywords.put("or",     OR);
-        keywords.put("print",  PRINT);
-        keywords.put("return", RETURN);
-        keywords.put("super",  SUPER);
-        keywords.put("this",   THIS);
-        keywords.put("true",   TRUE);
-        keywords.put("var",    VAR);
-        keywords.put("const",  CONST);
-        keywords.put("while",  WHILE);
-        keywords.put("break",  BREAK);
+        keywords.put("and",       AND);
+        keywords.put("class",     CLASS);
+        keywords.put("else",      ELSE);
+        keywords.put("false",     FALSE);
+        keywords.put("for",       FOR);
+        keywords.put("def",       DEF);
+        keywords.put("fun",       FUN);
+        keywords.put("lambda",    LAMBDA);
+        keywords.put("import",    IMPORT);
+        keywords.put("as",        AS);
+        keywords.put("if",        IF);
+        keywords.put("nil",       NIL);
+        keywords.put("or",        OR);
+        keywords.put("print",     PRINT);
+        keywords.put("return",    RETURN);
+        keywords.put("super",     SUPER);
+        keywords.put("this",      THIS);
+        keywords.put("true",      TRUE);
+        keywords.put("var",       VAR);
+        keywords.put("const",     CONST);
+        keywords.put("while",     WHILE);
+        keywords.put("break",     BREAK);
         keywords.put("continue",  CONTINUE);
     }
 
@@ -77,6 +77,7 @@ class Scanner {
             case '+': addToken(PLUS); break;
             case ';': addToken(SEMICOLON); break;
             case '*': addToken(STAR); break;
+            case '%': addToken(PERCENT); break;
             case '!':
                 addToken(match('=') ? BANG_EQUAL : BANG);
                 break;
