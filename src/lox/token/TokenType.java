@@ -1,6 +1,6 @@
-package lox;
+package lox.token;
 
-enum TokenType {
+public enum TokenType {
     // Single-character tokens.
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
     COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
@@ -15,9 +15,14 @@ enum TokenType {
     IDENTIFIER, STRING, NUMBER,
 
     // Keywords.
-    AND, CLASS, ELSE, FALSE, FUN, LAMBDA, DEF, FOR, IF, NIL, OR,
-    PRINT, RETURN, SUPER, THIS, TRUE, VAR, CONST, WHILE,
-    BREAK, CONTINUE,
+    FUN, DEF, LAMBDA, RETURN, CLASS, SUPER, THIS,
+    WHILE, FOR, BREAK, CONTINUE,
+    TRUE, FALSE, NIL,
+    VAR, CONST,
+    IMPORT, AS,
+    IF, ELSE,
+    AND, OR,
+    PRINT,
 
     EOF
 }

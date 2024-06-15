@@ -1,19 +1,26 @@
 package lox;
 
+import lox.token.Token;
+import lox.token.TokenType;
+import lox.tool_gen.Stmt;
+import lox.tool_gen.Expr;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static lox.TokenType.*;
+import static lox.token.TokenType.*;
 
 class Parser {
     private static class ParseError extends RuntimeException {}
 
     private final List<Token> tokens;
+    private final ModuleInfo moduleInfo;
     private int current = 0;
 
-    Parser(List<Token> tokens) {
+    Parser(List<Token> tokens, ModuleInfo moduleInfo) {
         this.tokens = tokens;
+        this.moduleInfo = moduleInfo;
     }
 
     List<Stmt> parse() {
@@ -66,6 +73,7 @@ class Parser {
     }
 
     private Stmt statement() {
+        if (match(IMPORT)) return importStatement();
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
@@ -76,6 +84,17 @@ class Parser {
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt importStatement() {
+        Token name = consume(STRING, "Expect path after 'import'.");
+        Token alias = null;
+        if (peek().type == AS) {
+            advance();
+            alias = consume(IDENTIFIER, "Expect identifier after 'as'.");
+        }
+        consume(SEMICOLON, "Expect ';' after import statement.");
+        return new Stmt.Import(name, alias);
     }
 
     private Stmt forStatement() {
@@ -202,17 +221,7 @@ class Parser {
     private Stmt.Function function(String kind) {
         Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
         consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
-        List<Token> parameters = new ArrayList<>();
-        if (!check(RIGHT_PAREN)) {
-            do {
-                if (parameters.size() >= 255) {
-                    error(peek(), "Can't have more than 255 parameters.");
-                }
-
-                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
-            } while (match(COMMA));
-        }
-        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+        List<Token> parameters = functionParameters();
 
         consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
         List<Stmt> body = block();
@@ -221,6 +230,14 @@ class Parser {
 
     private Expr.Lambda lambdaExpression() {
         consume(LEFT_PAREN, "Expect '(' after 'lambda'.");
+        List<Token> parameters = functionParameters();
+
+        consume(LEFT_BRACE, "Expect '{' before 'lambda' body.");
+        List<Stmt> body = block();
+        return new Expr.Lambda(new Stmt.Function(null, parameters, body));
+    }
+
+    private List<Token> functionParameters() {
         List<Token> parameters = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
             do {
@@ -232,10 +249,7 @@ class Parser {
             } while (match(COMMA));
         }
         consume(RIGHT_PAREN, "Expect ')' after parameters.");
-
-        consume(LEFT_BRACE, "Expect '{' before 'lambda' body.");
-        List<Stmt> body = block();
-        return new Expr.Lambda(new Stmt.Function(null, parameters, body));
+        return parameters;
     }
 
     private List<Stmt> block() {
@@ -260,7 +274,7 @@ class Parser {
                 Token name = ((Expr.Variable)expr).name;
                 return new Expr.Assign(name, value);
             } else if (expr instanceof Expr.Get get) {
-                return new Expr.Set(get.object, get.name, value);
+                return new Expr.Set(get.obj, get.name, value);
             }
 
             error(equals, "Invalid assignment target.");
@@ -455,7 +469,7 @@ class Parser {
     }
 
     private ParseError error(Token token, String message) {
-        Lox.error(token, message);
+        moduleInfo.error(token, message);
         return new ParseError();
     }
 

@@ -1,5 +1,7 @@
 package lox;
 
+import lox.token.Token;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +48,7 @@ class Environment {
     Environment ancestor(int distance) {
         Environment environment = this;
         for (int i = 0; i < distance; i++) {
+            assert environment != null;
             environment = environment.enclosing;
         }
 

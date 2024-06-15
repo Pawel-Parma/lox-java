@@ -1,5 +1,7 @@
 package lox;
 
+import lox.tool_gen.Stmt;
+
 import java.util.List;
 
 class LoxFunction implements LoxCallable {
@@ -21,6 +23,7 @@ class LoxFunction implements LoxCallable {
 
     @Override
     public String toString() {
+        assert declaration.name != null;
         return "<fn " + declaration.name.lexeme + ">";
     }
 

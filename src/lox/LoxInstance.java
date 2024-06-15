@@ -1,5 +1,7 @@
 package lox;
 
+import lox.token.Token;
+
 import java.util.HashMap;
 import java.util.Map;
 

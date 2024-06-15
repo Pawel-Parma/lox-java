@@ -1,17 +1,24 @@
 package lox;
 
+import lox.token.Token;
+import lox.token.TokenType;
+import lox.tool_gen.Stmt;
+import lox.tool_gen.Expr;
+
 import java.util.*;
 
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
+    private final ModuleInfo moduleInfo;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private final Stack<Set<String>> constants = new Stack<>(); // Add this line
     private FunctionType currentFunction = FunctionType.NONE;
     private ClassType currentClass = ClassType.NONE;
     private boolean isInLoop = false;
 
-    Resolver(Interpreter interpreter) {
+    Resolver(Interpreter interpreter, ModuleInfo moduleInfo) {
         this.interpreter = interpreter;
+        this.moduleInfo = moduleInfo;
     }
 
     private enum FunctionType {
@@ -35,6 +42,48 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitImportStmt(Stmt.Import stmt) {
+        boolean hasSlash = false;
+        char[] chars = stmt.name.lexeme.toCharArray();
+        int size = chars.length;
+
+        int i = 0;
+        for (char c : chars) {
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
+                    (c == '\\' || c == '/') || c == '-' || c == '_') {
+                if (c == '\\' || c == '/') {
+                    hasSlash = true;
+                }
+            } else if (i != 0 && i != size - 1){
+                System.out.println(c);
+                moduleInfo.error(stmt.name, "Import name must be a valid module name.");
+                return null;
+            }
+            i += 1;
+        }
+
+        if (chars[size - 1] == '\\' || chars[size - 1] == '/') {
+            moduleInfo.error(stmt.name, "Import name must not end with a slash.");
+            return null;
+        }
+
+        if (hasSlash) {
+            if (stmt.alias == null) {
+                Token errMessage = new Token(TokenType.SEMICOLON, ";", null, stmt.name.line);
+                moduleInfo.error(errMessage, "Expected alias because import name contains a slash or backslash.");
+            } else {
+                declare(stmt.alias);
+                define(stmt.alias);
+            }
+        } else {
+            declare(stmt.name);
+            define(stmt.name);
+        }
+
+        return null;
+    }
+
+    @Override
     public Void visitBlockStmt(Stmt.Block stmt) {
         beginScope();
         resolve(stmt.statements);
@@ -51,7 +100,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         define(stmt.name);
 
         if (stmt.superclass != null && stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) {
-            Lox.error(stmt.superclass.name, "A class can't inherit from itself.");
+            moduleInfo.error(stmt.superclass.name, "A class can't inherit from itself.");
         }
 
         if (stmt.superclass != null) {
@@ -69,6 +118,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
         for (Stmt.Function method : stmt.methods) {
             FunctionType declaration = FunctionType.METHOD;
+            assert method.name != null;
             if (method.name.lexeme.equals("init")) {
                 declaration = FunctionType.INITIALIZER;
             }
@@ -116,12 +166,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
         if (currentFunction == FunctionType.NONE) {
-            Lox.error(stmt.keyword, "Can't return from top-level code.");
+            moduleInfo.error(stmt.keyword, "Can't return from top-level code.");
         }
 
         if (stmt.value != null) {
             if (currentFunction == FunctionType.INITIALIZER) {
-                Lox.error(stmt.keyword, "Can't return a value from an initializer.");
+                moduleInfo.error(stmt.keyword, "Can't return a value from an initializer.");
             }
 
             resolve(stmt.value);
@@ -160,7 +210,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitBreakStmt(Stmt.Break stmt) {
         if (!isInLoop) {
-            Lox.error(stmt.keyword, "Can't use 'break' outside of a loop.");
+            moduleInfo.error(stmt.keyword, "Can't use 'break' outside of a loop.");
         }
         return null;
     }
@@ -168,7 +218,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitContinueStmt(Stmt.Continue stmt) {
         if (!isInLoop) {
-            Lox.error(stmt.keyword, "Can't use 'continue' outside of a loop.");
+            moduleInfo.error(stmt.keyword, "Can't use 'continue' outside of a loop.");
         }
         return null;
     }
@@ -178,7 +228,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         resolve(expr.value);
 
         if (!constants.isEmpty() && constants.peek().contains(expr.name.lexeme)) {
-            Lox.error(expr.name, "Cannot reassign a constant.");
+            moduleInfo.error(expr.name, "Cannot reassign a constant.");
         }
 
         resolveLocal(expr, expr.name);
@@ -212,7 +262,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitGetExpr(Expr.Get expr) {
-        resolve(expr.object);
+        resolve(expr.obj);
         return null;
     }
 
@@ -237,23 +287,23 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitSetExpr(Expr.Set expr) {
         resolve(expr.value);
 
-        if (expr.object instanceof Expr.Variable variable) {
+        if (expr.obj instanceof Expr.Variable variable) {
             if (!constants.isEmpty() && constants.peek().contains(variable.name.lexeme)) {
-                Lox.error(expr.name, "Cannot modify a field of a constant object.");
+                moduleInfo.error(expr.name, "Cannot modify a field of a constant object.");
                 return null;
             }
         }
 
-        resolve(expr.object);
+        resolve(expr.obj);
         return null;
     }
 
     @Override
     public Void visitSuperExpr(Expr.Super expr) {
         if (currentClass == ClassType.NONE) {
-            Lox.error(expr.keyword, "Can't use 'super' outside of a class.");
+            moduleInfo.error(expr.keyword, "Can't use 'super' outside of a class.");
         } else if (currentClass != ClassType.SUBCLASS) {
-            Lox.error(expr.keyword, "Can't use 'super' in a class with no superclass.");
+            moduleInfo.error(expr.keyword, "Can't use 'super' in a class with no superclass.");
         }
 
         resolveLocal(expr, expr.keyword);
@@ -263,7 +313,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitThisExpr(Expr.This expr) {
         if (currentClass == ClassType.NONE) {
-            Lox.error(expr.keyword, "Can't use 'this' outside of a class.");
+            moduleInfo.error(expr.keyword, "Can't use 'this' outside of a class.");
             return null;
         }
 
@@ -280,7 +330,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitVariableExpr(Expr.Variable expr) {
         if (!scopes.isEmpty() && scopes.peek().get(expr.name.lexeme) == Boolean.FALSE) {
-            Lox.error(expr.name, "Can't read local variable in its own initializer.");
+            moduleInfo.error(expr.name, "Can't read local variable in its own initializer.");
         }
 
         resolveLocal(expr, expr.name);
@@ -332,7 +382,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
         Map<String, Boolean> scope = scopes.peek();
         if (scope.containsKey(name.lexeme)) {
-            Lox.error(name, "Already a variable with this name in this scope.");
+            moduleInfo.error(name, "Already a variable with this name in this scope.");
         }
 
         scope.put(name.lexeme, false);

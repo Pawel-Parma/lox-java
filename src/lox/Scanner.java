@@ -1,11 +1,14 @@
 package lox;
 
+import lox.token.Token;
+import lox.token.TokenType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static lox.TokenType.*;
+import static lox.token.TokenType.*;
 
 class Scanner {
     private static final Map<String, TokenType> keywords;
@@ -20,6 +23,8 @@ class Scanner {
         keywords.put("def",    DEF);
         keywords.put("fun",    FUN);
         keywords.put("lambda", LAMBDA);
+        keywords.put("import", IMPORT);
+        keywords.put("as", AS);
         keywords.put("if",     IF);
         keywords.put("nil",    NIL);
         keywords.put("or",     OR);
@@ -36,14 +41,16 @@ class Scanner {
     }
 
     private final String source;
+    private final ModuleInfo moduleInfo;
     private final List<Token> tokens = new ArrayList<>();
 
     private int start = 0;
     private int current = 0;
     private int line = 1;
 
-    Scanner(String source) {
+    Scanner(String source, ModuleInfo moduleInfo) {
         this.source = source;
+        this.moduleInfo = moduleInfo;
     }
 
     List<Token> scanTokens() {
@@ -109,7 +116,7 @@ class Scanner {
                 } else if (isAlpha(c)) {
                     identifier();
                 } else {
-                    Lox.error(line, "Unexpected character.");
+                    moduleInfo.error(line, "Unexpected character.");
                 }
                 break;
         }
@@ -129,10 +136,9 @@ class Scanner {
 
         // Look for a fractional part.
         if (peek() == '.' && isDigit(peekNext())) {
-            // Consume the "."
-            advance();
-
-            while (isDigit(peek())) advance();
+            // Consume the "." then the digits.
+            do advance();
+            while (isDigit(peek()));
         }
 
         addToken(NUMBER, Double.parseDouble(source.substring(start, current)));
@@ -147,7 +153,7 @@ class Scanner {
         char currentChar = '\0';
         while ((peek() != '"' || currentChar == '\\' && prepreviousChar != '\\') && !isAtEnd()) {
             if (peek() == '\n') line++;
-            currentChar = source.charAt(current);;
+            currentChar = source.charAt(current);
 
             if ((previousChar == '\\' && prepreviousChar != '\\') || (previousChar == '\\' && preprepreviousChar == '\\')) {
                 switch (currentChar) {
@@ -173,7 +179,7 @@ class Scanner {
                         sb.append('\\');
                         break;
                     default:
-                        Lox.error(line, "Invalid escape sequence: '" + previousChar + currentChar + "'.");
+                        moduleInfo.error(line, "Invalid escape sequence: '" + previousChar + currentChar + "'.");
                         break;
                 }
             } else if (currentChar == '\\') {
@@ -192,7 +198,7 @@ class Scanner {
         }
 
         if (isAtEnd()) {
-            Lox.error(line, "Unterminated string.");
+            moduleInfo.error(line, "Unterminated string.");
             return;
         }
 

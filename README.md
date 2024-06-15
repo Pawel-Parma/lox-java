@@ -138,6 +138,47 @@ It has some solved challenges and my own modifications.
 
    </li>
   </ul>
+
+  <ul>
+   <li>
+    imports - importing other files. Examples:
+
+    // file1.lox
+    import "file2";  // Hello from file2
+    import "file3" as math;    
+
+    fun foo() {
+        print "Hello from foo of file1";
+    }
+    
+    foo();  // Hello from foo of file1
+    file2.foo();  // Hello from foo of file2
+
+    print math.pow(2, -math.PI);  // 0.0625
+
+    // file2.lox
+    fun foo() {
+        print "Hello from foo of file2";
+    }
+
+    print "Hello from file2";
+
+    // file3.lox
+    fun pow(val, exp) {
+        if (exp < 0) {
+            return 1 / pow(val, -exp);
+        }
+        var result = 1;
+        for (var i = 0; i < exp; i = i + 1) {
+            result = result * val;
+        }
+        return result;
+    }
+
+    const PI = 3.14;
+
+   </li>
+  </ul>
 </details>
 
 - ### [*jlox*](https://github.com/Pawel-Parma/lox-java/tree/jlox)

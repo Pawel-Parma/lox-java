@@ -1,5 +1,9 @@
 package lox;
 
+import lox.tool_gen.Stmt;
+import lox.tool_gen.Expr;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +51,7 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
 
     @Override
     public String visitGetExpr(Expr.Get expr) {
-        return print(expr.object) + "." + expr.name.lexeme;
+        return print(expr.obj) + "." + expr.name.lexeme;
     }
 
     @Override
@@ -69,7 +73,7 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
 
     @Override
     public String visitSetExpr(Expr.Set expr) {
-        return print(expr.object) + "." + expr.name.lexeme + " = " + print(expr.value);
+        return print(expr.obj) + "." + expr.name.lexeme + " = " + print(expr.value);
     }
 
     @Override
@@ -78,7 +82,7 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
-    public String visitThisExpr(Expr.This expr) {
+    public String visitThisExpr(@NotNull Expr.This expr) {
         return "this";
     }
 
@@ -90,6 +94,11 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     @Override
     public String visitVariableExpr(Expr.Variable expr) {
         return expr.name.lexeme;
+    }
+
+    @Override
+    public String visitImportStmt(Stmt.Import stmt) {
+        return "import \"" + stmt.name.lexeme + "\""+ (stmt.alias != null ? " as " + stmt.alias.lexeme : "") + ";";
     }
 
     @Override
@@ -120,6 +129,7 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
 
     @Override
     public String visitFunctionStmt(Stmt.Function stmt) {
+        assert stmt.name != null;
         return "fun " + stmt.name.lexeme + "(" + stmt.params.stream().map(p -> p.lexeme).collect(Collectors.joining(", ")) + ") { }";
     }
 
@@ -135,6 +145,7 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
 
     @Override
     public String visitReturnStmt(Stmt.Return stmt) {
+        if (stmt.value == null) return "return;";
         return "return " + print(stmt.value) + ";";
     }
 
@@ -149,12 +160,12 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     }
 
     @Override
-    public String visitBreakStmt(Stmt.Break stmt) {
+    public String visitBreakStmt(@NotNull Stmt.Break stmt) {
         return "break;";
     }
 
     @Override
-    public String visitContinueStmt(Stmt.Continue stmt) {
+    public String visitContinueStmt(@NotNull Stmt.Continue stmt) {
         return "continue;";
     }
 }
