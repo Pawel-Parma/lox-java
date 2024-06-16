@@ -43,16 +43,21 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitImportStmt(Stmt.Import stmt) {
-        boolean hasSlash = false;
+        boolean needsAs = false;
         char[] chars = stmt.name.lexeme.toCharArray();
         int size = chars.length;
+
+        if (size == 2) {
+            moduleInfo.error(stmt.name, "Import name cannot be empty.");
+            return null;
+        }
 
         int i = 0;
         for (char c : chars) {
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
-                    (c == '\\' || c == '/') || c == '-' || c == '_') {
-                if (c == '\\' || c == '/') {
-                    hasSlash = true;
+                    c == '\\' || c == '/' || c == '-' || c == '_' || c == '.') {
+                if (c == '\\' || c == '/' || c == '-' || c == '.') {
+                    needsAs = true;
                 }
             } else if (i != 0 && i != size - 1){
                 System.out.println(c);
@@ -62,15 +67,15 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             i += 1;
         }
 
-        if (chars[size - 1] == '\\' || chars[size - 1] == '/') {
+        if (chars[size - 2] == '\\' || chars[size - 2] == '/') {
             moduleInfo.error(stmt.name, "Import name must not end with a slash.");
             return null;
         }
 
-        if (hasSlash) {
+        if (needsAs) {
             if (stmt.alias == null) {
                 Token errMessage = new Token(TokenType.SEMICOLON, ";", null, stmt.name.line);
-                moduleInfo.error(errMessage, "Expected alias because import name contains a slash or backslash.");
+                moduleInfo.error(errMessage, "Expected alias: Import name contains one or more of following characters: '\\', '/', '-', '.'.");
             } else {
                 declare(stmt.alias);
                 define(stmt.alias);
